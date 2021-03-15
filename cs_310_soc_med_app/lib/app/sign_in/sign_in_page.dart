@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cs_310_soc_med_app/common_widgets/custom_raised_button.dart';
+import '../../common_widgets/custom_raised_button.dart';
+import 'button_with_text.dart';
 
 class SignInPage extends StatelessWidget {
   @override
@@ -7,7 +8,7 @@ class SignInPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         //
-        title: Center(child: Text('FakeGram')),
+        title: Center(child: Text('(: :)')),
         elevation: 10, //shadow that you can see under the appbar
       ),
       body: _buildContent(),
@@ -34,41 +35,65 @@ class SignInPage extends StatelessWidget {
 
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 48),
+
           CustomRaisedButton(
-            child: Text(
-              'Sign in with Google',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Image.asset('images/google-logo.png'),
+                Text('Sign in with Google',
+
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.black87,
+                  ),
+                ),
+                Opacity(
+                    opacity: 0,
+                    child: Image.asset('images/google-logo.png')
+                ),
+              ],
             ),
             color: Colors.white,
-            borderRadius: 4,
             onPressed: (){},
           ),
+
+          SizedBox(height: 15),
           CustomRaisedButton(
-            child: Text(
-              'Sign in with Facebook',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
+
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Image.asset('images/facebook-logo.png'),
+                Text(
+                  'Sign in with Facebook',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
+                ),
+                Opacity(
+                  opacity: 0,
+                    child: Image.asset('images/facebook-logo.png')
+                ),
+              ],
             ),
-            color: Colors.white,
-            borderRadius: 4,
+            color: Color(0xFF334D92), //facebook rengiymiş bu
             onPressed: (){},
           ),
-          CustomRaisedButton(
-            child: Text(
+          SizedBox(height: 15),
+          ButtonWithText(
+            /*child: Text(
               'Sign in',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.black87,
               ),
-            ),
-            color: Colors.white,
-            borderRadius: 4,
+            ),*/
+            text: 'Sign in with email',
+            textColor: Colors.white,
+            color: Colors.teal[600],
             onPressed: (){},
           ),
         ],
@@ -76,4 +101,5 @@ class SignInPage extends StatelessWidget {
     );
   }
 }
+
 
