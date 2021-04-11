@@ -1,5 +1,5 @@
+import 'package:banana/util/Styles.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:banana/util/Colors.dart';
 import 'package:passwordfield/passwordfield.dart';
 
@@ -13,21 +13,20 @@ class Register extends StatelessWidget {
       appBar: AppBar(
         bottom: PreferredSize(
             child: Container(
-              color: Colors.black54,
+              color: AppColors().mostUsedBlack,
               height: 1.0,
             ),
             preferredSize: Size.fromHeight(4.0)),
         iconTheme: IconThemeData(
-          color: Colors.black54, //change your color here
+          color: AppColors().mostUsedBlack,
         ),
         title: Text("Sign Up",
           style: TextStyle(
-              color: Colors.black54
+            color: AppColors().mostUsedBlack,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
-
+        backgroundColor: AppColors().innerButtonWhite,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -53,95 +52,75 @@ class Register extends StatelessWidget {
                       Padding(
                         //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
                         padding: EdgeInsets.symmetric(horizontal: 15),
-                        child: TextField(
-                          decoration: InputDecoration(
-                              //prefixIcon: Icon(Icons.contact_phone_rounded ),
-                              suffixIcon: Icon(Icons.badge),
-                              fillColor: AppColors().batmanGrey,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0),
-                                borderSide: BorderSide(color:AppColors().batmanGrey),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
-                                borderRadius: BorderRadius.circular(25.0),
-                              ),
-                              labelStyle: TextStyle(
-                                  color:  Colors.black54
-                              ),
-                              labelText: 'Name',
-                              hintText: 'Enter your name',
-                              hintStyle: TextStyle(
-                                  color:Color.fromRGBO(212, 140, 0, 1)
-                              )
+                        child: Theme(
+                          child: TextFormField(
+                            decoration: AppStyles().nameDecoration,
+                            validator: (name){
+                              if(name == null || name.isEmpty){
+                                return 'Please enter a name';
+                              }else if(name.length<6){
+                                return 'Please enter a name longer than 6 characters';
+                              }else{
+                                return null;
+                              }
+                            },
                           ),
+                          data:Theme.of(context).copyWith(primaryColor: AppColors().authenticationInput),
                         ),
                       ),
                       Padding(
                         padding:  EdgeInsets.only(left:15.0,right: 15.0,top:7,bottom: 0),
                         //padding: EdgeInsets.symmetric(horizontal: 15),
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                              suffixIcon: Icon(Icons.contact_mail_rounded),
-                              fillColor: AppColors().batmanGrey,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0),
-                                borderSide: BorderSide(color:AppColors().batmanGrey),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
-                                borderRadius: BorderRadius.circular(25.0),
-                              ),
-                              labelStyle: TextStyle(
-                                  color:  Colors.black54
-                              ),
-                              labelText: 'Email',
-                              hintText: 'abc@gmail.com',
-                              hintStyle: TextStyle(
-                                  color:Color.fromRGBO(212, 140, 0, 1)
-                              )
+                        child: Theme(
+                          child: TextFormField(
+                            decoration: AppStyles().emailDecoration,
+                            validator: (contact){
+                              if(contact == null || contact.isEmpty){
+                                return 'Please enter an email';
+                              }else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(contact)){
+                                return "Enter a valid email";
+                              }else{
+                                return null;
+                              }
+                            },
                           ),
-                          validator: (contact){
-                            if(contact == null || contact.isEmpty){
-                              return 'Please enter an email';
-                            }else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(contact)){
-                              return "Enter a valid email";
-                            }else{
-                              return null;
-                            }
-                          },
+                          data:Theme.of(context).copyWith(primaryColor: AppColors().authenticationInput),
                         ),
                       ),
                       Padding(
                         padding:  EdgeInsets.only(
                             left: 15.0, right: 15.0, top: 7, bottom: 0),
                         //padding: EdgeInsets.symmetric(horizontal: 15),
-                        child: PasswordField(
-                              suffixIcon: Icon(Icons.vpn_key_rounded,color: AppColors().batmanGrey,),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25.0),
-                                borderSide: BorderSide(color:AppColors().batmanGrey),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
-                                borderRadius: BorderRadius.circular(25.0),
-                              ),
-                              hintText: 'Password',
-                          pattern: r'().{8,}',
-                            errorMessage: 'Password must be at least 8 characters.'
-                          ),
+                        child: Theme(
+                          child: PasswordField(
+                                floatingText: "Password",
+                                hasFloatingPlaceholder: true,
+                                suffixIcon: Icon(Icons.vpn_key_rounded,color: AppColors().batmanGrey,),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25.0),
+                                  borderSide: BorderSide(color:AppColors().batmanGrey),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
+                                  borderRadius: BorderRadius.circular(25.0),
+                                ),
+                            pattern: r'().{8,}',
+                              errorMessage: 'Password must be at least 8 characters.'
+                            ),
+                          data: Theme.of(context).copyWith(primaryColor: AppColors().mostUsedBlack),
+                        ),
                         ),
                     ],
                   ),
                 ),
               ],
             ),
-SizedBox(height: 25,),
+              SizedBox(height: 25,),
                 ElevatedButton(
                   child:Text("Sign Up",
                       style:TextStyle(
                           fontSize: 12,
-                          color: Colors.white
+                          color: AppColors().innerButtonWhite
                       )
                   )
                   ,onPressed: (){
@@ -151,16 +130,8 @@ SizedBox(height: 25,),
                       print(_formKey.currentState.validate());
                     }
                 },
-                  style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(AppColors().themeColor),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(40.0),
-                          )
-                      )
-                  ),
+                  style: AppStyles().submitButton
                 ),
-
           ],
         ),
       ),

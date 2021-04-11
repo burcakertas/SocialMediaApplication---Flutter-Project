@@ -1,6 +1,5 @@
+import 'package:banana/util/Styles.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:banana/util/Colors.dart';
 
 class Welcome extends StatelessWidget {
   @override
@@ -20,33 +19,17 @@ class Welcome extends StatelessWidget {
         ),
         Center(
           child: Text("Reach the whole world \n\t\t with a single click."
-          ,style: GoogleFonts.openSans(
-                fontStyle: FontStyle.normal,
-                textStyle: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold
-                )
-              )
+          ,style: AppStyles().welcomeLargeText
           ),
         ),
         ElevatedButton(
           child:Text("Create an account",
-            style:TextStyle(
-              fontSize: 12,
-              color: Colors.white
-            )
+            style:AppStyles().createAnAccText
           )
         ,onPressed: (){
             Navigator.pushNamed(context, "/signup");
         },
-          style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(AppColors().themeColor),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40.0),
-                  )
-              )
-          ),
+          style: AppStyles().createAnAccButton
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -58,20 +41,10 @@ class Welcome extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   Text("Already have an account?",
-                      style:GoogleFonts.openSans(
-                          textStyle:TextStyle(
-                              color: AppColors().batmanGrey
-                          ),
-                          fontWeight: FontWeight.bold
-                      )
+                      style:AppStyles().alreadyHaveAccTexts["grey"]
                   ),
                   Text(" Login",
-                    style:GoogleFonts.openSans(
-                        textStyle:TextStyle(
-                            color: AppColors().themeColor
-                        ),
-                        fontWeight: FontWeight.bold
-                    ),
+                    style:AppStyles().alreadyHaveAccTexts["yellow"]
                   ),
                 ],
               )

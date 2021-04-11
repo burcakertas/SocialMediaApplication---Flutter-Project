@@ -2,7 +2,8 @@ import 'package:banana/routes/welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_walkthrough_screen/flutter_walkthrough_screen.dart';
 import 'package:banana/util/Colors.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:banana/util/Styles.dart';
+
 class TestScreen extends StatelessWidget {
 
   final List<OnbordingData> list = [
@@ -11,13 +12,7 @@ class TestScreen extends StatelessWidget {
       imageWidth: 80,
       imageHeight: 80,
       titleText:Text("Welcome to Banana",
-        style: GoogleFonts.openSans(
-          textStyle: TextStyle(
-              color:AppColors().themeColor,
-            fontSize: 30.0,
-            fontWeight: FontWeight.bold
-          )
-        ),
+        style: AppStyles().walkthroughTitle,
       ),
       descText: Text("Banana is a social media app developed in order to satisfy the needs of enthusiastic social media addicts.",textAlign: TextAlign.center),
     ),
@@ -26,13 +21,7 @@ class TestScreen extends StatelessWidget {
       imageWidth: 200,
       imageHeight: 200,
       titleText:Text("Feed Page",
-          style: GoogleFonts.openSans(
-              textStyle: TextStyle(
-                  color:AppColors().themeColor,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.bold
-              )
-          )
+        style: AppStyles().walkthroughTitle,
       ),
       descText: Text("You can follow what is happening around constantly in your Feed Page.",textAlign: TextAlign.center),
     ),
@@ -42,13 +31,7 @@ class TestScreen extends StatelessWidget {
       imageHeight: 200,
       titleText:Text("Multifunctional Search Engine",
           textAlign: TextAlign.center,
-          style: GoogleFonts.openSans(
-              textStyle: TextStyle(
-                  color:AppColors().themeColor,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.bold
-              )
-          )
+          style: AppStyles().walkthroughTitle,
       ),
       descText: Text("This is desc4"),
     ),
@@ -58,13 +41,7 @@ class TestScreen extends StatelessWidget {
       imageHeight: 150,
       titleText:Text("Follow profiles and topics",
           textAlign: TextAlign.center,
-          style: GoogleFonts.openSans(
-              textStyle: TextStyle(
-                  color:AppColors().themeColor,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.bold
-              )
-          )
+          style: AppStyles().walkthroughTitle,
       ),
       descText: Text("This is desc4"),
     ),
@@ -74,13 +51,7 @@ class TestScreen extends StatelessWidget {
       imageHeight: 200,
       titleText:Text("Interact with posts",
           textAlign: TextAlign.center,
-          style: GoogleFonts.openSans(
-              textStyle: TextStyle(
-                  color:AppColors().themeColor,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.bold
-              )
-          )
+          style: AppStyles().walkthroughTitle,
       ),
       descText: Text("This is desc4"),
     ),
@@ -90,13 +61,7 @@ class TestScreen extends StatelessWidget {
       imageHeight: 150,
       titleText:Text("Messages",
           textAlign: TextAlign.center,
-          style: GoogleFonts.openSans(
-              textStyle: TextStyle(
-                  color:AppColors().themeColor,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.bold
-              )
-          )
+          style: AppStyles().walkthroughTitle,
       ),
       descText: Text("This is desc4"),
     ),
@@ -106,13 +71,7 @@ class TestScreen extends StatelessWidget {
       imageHeight: 175,
       titleText:Text("Many more features",
           textAlign: TextAlign.center,
-          style: GoogleFonts.openSans(
-              textStyle: TextStyle(
-                  color:AppColors().themeColor,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.bold
-              )
-          )
+          style: AppStyles().walkthroughTitle,
       ),
       descText: Text("This is desc4"),
     ),
@@ -150,8 +109,8 @@ class TestScreen extends StatelessWidget {
           color: AppColors().themeColor,
         ),
       ),
-      selectedDotColor: Colors.orange,
-      unSelectdDotColor: Colors.grey,
+      selectedDotColor: AppColors().selectedDotColor,
+      unSelectdDotColor: AppColors().unselectedDotColor,
     );
   }
 }
