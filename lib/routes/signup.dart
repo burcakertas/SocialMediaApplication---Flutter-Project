@@ -11,6 +11,10 @@ class Register extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: new IconButton(
+          icon: new Icon(Icons.arrow_back, color: AppColors().mostUsedBlack),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         bottom: PreferredSize(
             child: Container(
               color: AppColors().mostUsedBlack,

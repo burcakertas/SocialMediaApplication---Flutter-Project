@@ -10,6 +10,10 @@ class Login extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: new IconButton(
+          icon: new Icon(Icons.arrow_back, color: AppColors().mostUsedBlack),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         bottom: PreferredSize(
             child: Container(
               color: AppColors().mostUsedBlack,
@@ -105,7 +109,9 @@ class Login extends StatelessWidget {
                       color:AppColors().authenticationInput
                     )
                   ),
-                  onPressed: (){},
+                  onPressed: (){
+                    Navigator.pushNamed(context, "/profile");
+                  },
                 ),
                 SizedBox(height: 50,),
                 ElevatedButton(
@@ -121,6 +127,7 @@ class Login extends StatelessWidget {
                   }else{
                     print(_formKey.currentState.validate());
                   }
+                  Navigator.pushNamed(context, "/home");
                 },
                   style: AppStyles().submitButton
                 ),

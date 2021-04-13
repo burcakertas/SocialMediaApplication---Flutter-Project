@@ -33,7 +33,7 @@ class TestScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppStyles().walkthroughTitle,
       ),
-      descText: Text("This is desc4"),
+      descText: Text("By using search engine, you can discover new profiles and topics.",textAlign: TextAlign.center),
     ),
     OnbordingData(
       image: AssetImage("assets/follow.png"),
@@ -43,7 +43,7 @@ class TestScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppStyles().walkthroughTitle,
       ),
-      descText: Text("This is desc4"),
+      descText: Text("You can create some posts, follow profiles and interact with people.",textAlign: TextAlign.center),
     ),
     OnbordingData(
       image: AssetImage("assets/social-media-2706072-2260980.webp"),
@@ -53,7 +53,7 @@ class TestScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppStyles().walkthroughTitle,
       ),
-      descText: Text("This is desc4"),
+      descText: Text("It is possible to interact with almost any post users share."),
     ),
     OnbordingData(
       image: AssetImage("assets/people-surrounded-by-social-media-icons-concept-illustration_52683-23432.jpg"),
@@ -63,7 +63,7 @@ class TestScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppStyles().walkthroughTitle,
       ),
-      descText: Text("This is desc4"),
+      descText: Text("Communicating with individuals have never been this easy."),
     ),
     OnbordingData(
       image: AssetImage("assets/features.jpg"),
@@ -73,7 +73,7 @@ class TestScreen extends StatelessWidget {
           textAlign: TextAlign.center,
           style: AppStyles().walkthroughTitle,
       ),
-      descText: Text("This is desc4"),
+      descText: Text("Join and discover our application.",textAlign: TextAlign.center),
     ),
   ];
 
