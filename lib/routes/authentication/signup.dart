@@ -1,11 +1,33 @@
 import 'package:banana/util/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
-import 'package:passwordfield/passwordfield.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class Register extends StatelessWidget {
+class Register extends StatefulWidget {
 
+  @override
+  _RegisterState createState() => _RegisterState();
+}
+
+class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
+
+  final List<String> textFieldsValue = [];
+  bool _isToggled = true;
+  var _toggleIcon = Icon(Icons.remove_red_eye, color: Colors.grey);
+
+  _togglePassword() {
+    setState(() {
+      if (_isToggled == false) {
+        _toggleIcon = Icon(Icons.remove_red_eye, color: Colors.grey);
+        _isToggled = true;
+      } else {
+        _toggleIcon = Icon(Icons.remove_red_eye, color: Colors.blue);
+        _isToggled = false;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +66,8 @@ class Register extends StatelessWidget {
                       image:AssetImage(
                           "assets/banana_welcome.png"
                       ),
-                      width: 70,
-                      height: 70,
+                      width: 90,
+                      height: 90,
                     )
                 ),
                 SizedBox(height: 25,),
@@ -65,6 +87,26 @@ class Register extends StatelessWidget {
                               }else if(name.length<6){
                                 return 'Please enter a name longer than 6 characters';
                               }else{
+                                textFieldsValue.add(name);
+                                return null;
+                              }
+                            },
+                          ),
+                          data:Theme.of(context).copyWith(primaryColor: AppColors().authenticationInput),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left:15.0,right: 15.0,top:7,bottom: 0),
+                        child: Theme(
+                          child: TextFormField(
+                            decoration: AppStyles().usernameDecoration,
+                            validator: (name){
+                              if(name == null || name.isEmpty){
+                                return 'Please enter a username';
+                              }else if(name.length<6){
+                                return 'Please enter a username longer than 6 characters';
+                              }else{
+                                textFieldsValue.add(name);
                                 return null;
                               }
                             },
@@ -84,6 +126,7 @@ class Register extends StatelessWidget {
                               }else if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(contact)){
                                 return "Enter a valid email";
                               }else{
+                                textFieldsValue.add(contact);
                                 return null;
                               }
                             },
@@ -92,14 +135,16 @@ class Register extends StatelessWidget {
                         ),
                       ),
                       Padding(
-                        padding:  EdgeInsets.only(
-                            left: 15.0, right: 15.0, top: 7, bottom: 0),
+                        padding:  EdgeInsets.only(left:15.0,right: 15.0,top:7,bottom: 0),
                         //padding: EdgeInsets.symmetric(horizontal: 15),
                         child: Theme(
-                          child: PasswordField(
-                                floatingText: "Password",
-                                hasFloatingPlaceholder: true,
-                                suffixIcon: Icon(Icons.vpn_key_rounded,color: AppColors().batmanGrey,),
+                          child: TextFormField(
+                            onChanged: (input){
+                            },
+                            obscureText: _isToggled,
+                            decoration: InputDecoration(
+                              //prefixIcon: Icon(Icons.contact_phone_rounded ),
+                                fillColor: AppColors().batmanGrey,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(25.0),
                                   borderSide: BorderSide(color:AppColors().batmanGrey),
@@ -108,12 +153,37 @@ class Register extends StatelessWidget {
                                   borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
                                   borderRadius: BorderRadius.circular(25.0),
                                 ),
-                            pattern: r'().{8,}',
-                              errorMessage: 'Password must be at least 8 characters.'
+                                labelStyle: TextStyle(
+                                  color: AppColors().mostUsedBlack,
+                                ),
+                                labelText: 'Password',
+                                hintText: 'Enter your password',
+                                suffix: InkWell(
+                                  onTap: (){
+                                    _togglePassword();
+                                  },
+                                  child: _toggleIcon,
+                                ),
+                                hintStyle: TextStyle(
+                                    color:AppColors().authenticationInput
+                                )
                             ),
-                          data: Theme.of(context).copyWith(primaryColor: AppColors().mostUsedBlack),
+                            validator: (contact){
+                              if(contact == null || contact.isEmpty){
+                                return 'Please enter a password';
+                              }else if (!RegExp(r"^[a-zA-Z0-9]{4,}").hasMatch(contact)){
+                                return "Weak";
+                              }else if (!RegExp(r"^[a-zA-Z0-9]{8,}").hasMatch(contact)){
+                                return "Middle";
+                              }else{
+                                textFieldsValue.add(contact);
+                                return null;
+                              }
+                            },
+                          ),
+                          data:Theme.of(context).copyWith(primaryColor: AppColors().authenticationInput),
                         ),
-                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -130,6 +200,25 @@ class Register extends StatelessWidget {
                   ,onPressed: (){
                     if(_formKey.currentState.validate()){
                       print("Form is valid.");
+                      print(textFieldsValue);
+                      final response=http.post(
+                        Uri.http('localhost:3000', '/users'),
+                        headers: <String, String>{
+                          'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: jsonEncode(<String, String>{
+                          'name': textFieldsValue[0],
+                          'email':textFieldsValue[2],
+                          'username':textFieldsValue[1],
+                          'password':textFieldsValue[3]
+                        }),
+                      );
+                      response.then((value) => (){
+                        if(value.statusCode!=200){
+                          print("Error");
+                          textFieldsValue.removeRange(0, textFieldsValue.length);
+                        }
+                      });
                     }else{
                       print(_formKey.currentState.validate());
                     }

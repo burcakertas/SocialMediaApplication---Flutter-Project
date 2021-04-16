@@ -30,7 +30,13 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^2.0.0
   flutter_walkthrough_screen: ^0.0.2
-  passwordfield: ^0.0.82
+  custom_switch: ^0.0.1
+  like_button: ^2.0.2
+  font_awesome_flutter: ^8.8.1
+  http: ^0.13.1
+  shared_preferences: ^2.0.5
+  connectivity: ^3.0.3
+  auto_size_text: ^2.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

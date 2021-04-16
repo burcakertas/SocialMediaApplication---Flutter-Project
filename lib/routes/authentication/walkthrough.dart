@@ -1,4 +1,4 @@
-import 'package:banana/routes/welcome.dart';
+import 'package:banana/routes/authentication/welcome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_walkthrough_screen/flutter_walkthrough_screen.dart';
 import 'package:banana/util/Colors.dart';
