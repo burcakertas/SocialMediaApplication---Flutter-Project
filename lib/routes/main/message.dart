@@ -1,15 +1,18 @@
+import 'package:banana/util/Message.dart';
 import 'package:flutter/material.dart';
-import 'package:banana/util/User.dart';
 import 'package:banana/util/Colors.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-Future<User> fetchUser(String id) async {
-  final response = await http.get(Uri.http('localhost:3000', '/users',{"id":id}));
+Future<ChatUsersDetailed> fetchMessages(String id) async {
+  final response = await http.get(Uri.http('localhost:3000', '/messages',{"_start":id,"_end":(int.parse(id)+1).toString()}));
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
-    return User.fromJson(jsonDecode(response.body)[0]);
+    var decoded = jsonDecode(response.body)[0][0];
+
+    var generated = ChatUsersDetailed(id: decoded["id"], text: decoded["text"], messageText: decoded["messageText"], image: decoded["p_pic"],conversations: decoded["conversation"]);
+    return generated;
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
@@ -30,7 +33,7 @@ class _SingleMessageState extends State<SingleMessage> {
     setState(() {
       id=rcvdData["id"].toString();
     });
-    return FutureBuilder(future:fetchUser(id),builder: (context,data){
+    return FutureBuilder(future:fetchMessages(id),builder: (context,data){
       if(data.hasData){
         return Scaffold(
             appBar: AppBar(
@@ -50,7 +53,7 @@ class _SingleMessageState extends State<SingleMessage> {
                       ),
                       SizedBox(width: 2,),
                       CircleAvatar(
-                        backgroundImage: NetworkImage(data.data.picture),
+                        backgroundImage: NetworkImage(data.data.image),
                         maxRadius: 20,
                       ),
                       SizedBox(width: 12,),
@@ -59,7 +62,7 @@ class _SingleMessageState extends State<SingleMessage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Text(data.data.name,style: TextStyle( fontSize: 16 ,fontWeight: FontWeight.w600),),
+                            Text(data.data.text,style: TextStyle( fontSize: 16 ,fontWeight: FontWeight.w600),),
                             SizedBox(height: 6,),
                             Text("Online",style: TextStyle(color: Colors.grey.shade600, fontSize: 13),),
                           ],
@@ -78,9 +81,71 @@ class _SingleMessageState extends State<SingleMessage> {
                 ),
               ),
             ),
-            body: Container()
+            body: SingleChildScrollView(
+              reverse: true,
+              child: Column(
+                children: [
+                  ListView.builder(
+                    itemCount: data.data.conversations.length,
+                    shrinkWrap: true,
+                    padding: EdgeInsets.only(top: 10,bottom: 10),
+                    physics: PageScrollPhysics(),
+                    reverse: true,
+                    itemBuilder: (context, index){
+                      return Container(
+                        padding: EdgeInsets.only(left: 14,right: 14,top: 10,bottom: 10),
+                        child: Align(
+                          alignment: (data.data.conversations[index]["whose"] == "others"?Alignment.topLeft:Alignment.topRight),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: (data.data.conversations[index]["whose"]  == "others"?Colors.grey.shade200:Colors.blue[200]),
+                            ),
+                            padding: EdgeInsets.all(16),
+                            child: Text(data.data.conversations[index]["content"], style: TextStyle(fontSize: 15),),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Container(
+                      padding: EdgeInsets.only(left: 10,bottom: 10,top: 10),
+                      height: 60,
+                      width: double.infinity,
+                      color: Colors.white,
+                      child: Row(
+                        children: <Widget>[
+                          SizedBox(width: 15,),
+                          Expanded(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                  hintText: "Write message...",
+                                  hintStyle: TextStyle(color: Colors.black54),
+                                  border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 15,),
+                          FloatingActionButton(
+                            onPressed: (){},
+                            child: Icon(Icons.send,color: Colors.white,size: 18,),
+                            backgroundColor: Colors.blue,
+                            elevation: 0,
+                          ),
+                        ],
+
+                      ),
+                    ),
+                  ),
+                  Container(child: SizedBox(height:10,),color: Colors.white,)
+                ],
+              ),
+            ),
         );
-      }return Center(
+      }//Navigator.pop(context);
+      return Center(
         child: CircularProgressIndicator(
           backgroundColor: AppColors().themeColor,
           valueColor: new AlwaysStoppedAnimation<Color>(AppColors().themeColor),

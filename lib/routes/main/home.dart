@@ -9,14 +9,6 @@ import 'package:banana/components/messagesBody.dart';
 import 'package:banana/util/Feed.dart';
 import 'package:banana/util/Message.dart';
 
-/*
-* return SingleChildScrollView(child:
-    Column(
-      children: [
-        for(var item in data.data)UserCards().postCard(item)
-      ],)
-    );
-* */
 Widget buildBody(int state,String id,dynamic context){
   if(state==0){
     return FutureBuilder(
@@ -53,7 +45,9 @@ Widget buildBody(int state,String id,dynamic context){
     );
   }else{
     print(state);
-    return Text("Something is wrong...");
+    return Center(
+        child:Text("This page is under construction")
+    );
   }
 }
 Future<List<Feed>> fetchFeed(int state,String id) async{
@@ -83,7 +77,6 @@ Future<List<ChatUsers>> fetchMessages(int state,String id) async{
     // If the server did return a 200 OK response,
     // then parse the JSON.
     var decoded = jsonDecode(response.body)[0];
-    print(decoded);
     for(var item in decoded){
       msg.add(ChatUsers(id:item["id"].toString(),text: item["text"], messageText: item["messageText"], image: item["p_pic"]));
     }

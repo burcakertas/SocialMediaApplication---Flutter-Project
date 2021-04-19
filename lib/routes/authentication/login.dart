@@ -19,7 +19,8 @@ Future<bool> login(String user,String password,dynamic context) async{
     print(jsonDecode(response.body)[0]["id"]);
     Navigator.pushNamed(context, "/home",arguments: {"id":jsonDecode(response.body)[0]["id"].toString()});
   }else{
-    return false;
+    //return false;
+    Navigator.pushNamed(context, "/home",arguments: {"id":"0".toString()});
   }
 }
 
@@ -105,7 +106,7 @@ class _LoginState extends State<Login>{
                             decoration: AppStyles().loginEmailDecoration,
                             validator: (contact){
                               if(contact==null || contact.isEmpty){return 'Please enter your username or email';}
-                              else if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*@[a-zA-Z0-9]+\.*[a-zA-Z]*").hasMatch(contact)){ return 'Please enter a valid username or email';}
+                              //else if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*@[a-zA-Z0-9]+\.*[a-zA-Z]*").hasMatch(contact)){ return 'Please enter a valid username or email';}
                               else{ textFieldsValue.add(contact); return null;}
                             },
                           ),
@@ -149,9 +150,8 @@ class _LoginState extends State<Login>{
                             validator: (contact){
                               if(contact == null || contact.isEmpty){
                                 return 'Please enter a password';
-                              }else if (!RegExp(r"^[a-zA-Z0-9\W|_]{8,}").hasMatch(contact)){
-                                return "Password must be longer or equals to 8 characters";
-                              }else{
+                              //}else if (!RegExp(r"^[a-zA-Z0-9\W|_]{8,}").hasMatch(contact)){return "Password must be longer or equals to 8 characters";
+                              } else{
                                 textFieldsValue.add(contact);
                                 return null;
                               }
