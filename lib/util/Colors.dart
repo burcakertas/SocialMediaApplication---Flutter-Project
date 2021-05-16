@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class AppColors{
   //Theme Colors
-  final Color themeColor = Color.fromRGBO(250, 199, 16, 1);
+  final Color themeColor = Color.fromRGBO(250, 199, 16, 1.0);
   final Color batmanGrey = Color.fromRGBO(128, 128, 128, 1);
   final innerButtonWhite = Colors.white;
   final mostUsedBlack = Colors.black54;

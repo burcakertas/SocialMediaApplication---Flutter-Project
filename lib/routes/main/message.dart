@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
+import 'dart:io';
 Future<ChatUsersDetailed> fetchMessages(String id) async {
-  final response = await http.get(Uri.http('localhost:3000', '/messages',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+  final response = await http.get(Uri.http('localhost:3000', '/messages_single',{"_start":id,"_end":(int.parse(id)+1).toString()}));
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
-    var decoded = jsonDecode(response.body)[0][0];
+    var decoded = jsonDecode(response.body)[0];
 
-    var generated = ChatUsersDetailed(id: decoded["id"], text: decoded["text"], messageText: decoded["messageText"], image: decoded["p_pic"],conversations: decoded["conversation"]);
+    var generated =  ChatUsersDetailed(id:decoded["id"].toString(), text:decoded["text"],  messageText:decoded["messageText"], image:decoded["p_pic"],conversations:["amk","amk","amk","amk"]);
     return generated;
   } else {
     // If the server did not return a 200 OK response,
@@ -95,14 +95,14 @@ class _SingleMessageState extends State<SingleMessage> {
                       return Container(
                         padding: EdgeInsets.only(left: 14,right: 14,top: 10,bottom: 10),
                         child: Align(
-                          alignment: (data.data.conversations[index]["whose"] == "others"?Alignment.topLeft:Alignment.topRight),
+                          alignment: (index%2==0?Alignment.topLeft:Alignment.topRight),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color: (data.data.conversations[index]["whose"]  == "others"?Colors.grey.shade200:Colors.blue[200]),
+                              color: (index%2!=0?Colors.grey.shade200:Colors.blue[200]),
                             ),
                             padding: EdgeInsets.all(16),
-                            child: Text(data.data.conversations[index]["content"], style: TextStyle(fontSize: 15),),
+                            child: Text(data.data.conversations[index], style: TextStyle(fontSize: 15),),
                           ),
                         ),
                       );
@@ -144,13 +144,15 @@ class _SingleMessageState extends State<SingleMessage> {
               ),
             ),
         );
-      }//Navigator.pop(context);
+      }
+
       return Center(
         child: CircularProgressIndicator(
           backgroundColor: AppColors().themeColor,
           valueColor: new AlwaysStoppedAnimation<Color>(AppColors().themeColor),
         ),
       );
+
     });
   }
 }

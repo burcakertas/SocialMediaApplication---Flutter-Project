@@ -8,6 +8,7 @@ var avatarList = [
     "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/cloud_crying_rain_avatar-512.png",
     "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/santa_clous_christmas-512.png"
 ];
+
 function between(min, max) {  
     return Math.floor(
       Math.random() * (max - min) + min
@@ -29,8 +30,9 @@ function between(min, max) {
       }
       return a;
   }
+
 module.exports = () => {
-    const data = { users: [] , feeds: [], messages: [] ,followers:[], followings:[],followers_request:[],user_bananas:[]};
+    const data = { users: [] , feeds: [], messages: [],messages_single: [] ,followers:[], followings:[],followers_request:[],user_bananas:[],notifications: []};
     // Create 1000 users
     for (let i = 0; i < 1000; i++) {
         var followers = [];
@@ -103,6 +105,37 @@ module.exports = () => {
             temp.push({id:j,text:faker.name.findName(),messageText:faker.lorem.paragraph(),p_pic:avatarList[choice],time:faker.time.recent()});
         }
         data.messages.push(temp);
+    }
+    for(let i = 0; i < 1000; i++){
+            var user = data.users[i];
+            var conversations_ = [];
+            for (let j = 0; j < between(1,10);j++){
+                conversations_.push(faker.lorem.paragraph());
+            }
+            data.messages_single.push({id:i,text:faker.name.findName(),messageText:conversations_[0],conversations:conversations_,p_pic:avatarList[between(0,4)]});
+        }
+    for(let i = 0; i < 100; i++){
+        var users_not = [];
+        for (let j = 0; j < 50;j++){
+            var choice = between(0,6);
+            var id_ = between(0,1000);
+            var post_="";
+            if(j%2==0){
+                var c = between(0,3);
+                if(c==1){
+                    post="A user commented on your post";
+                }else if(c==2){
+                    post="A user liked your post";
+                }
+            }
+            var imagesOf = between(0,10);
+            var image_=[];
+            for(let k = 0 ; k<imagesOf;k++){
+                image_.push(avatarList[k%5]);
+            }
+            users_not.push({id:j,type:j%2==0?"post":"follow",like:between(0,100),text:post,image:image_});
+        }
+        data.notifications.push(users_not);
     }
     return data
   }

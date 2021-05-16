@@ -1,13 +1,20 @@
 import 'dart:convert';
 import 'dart:async';
-import 'package:banana/components/postCard.dart';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:banana/util/Colors.dart';
+
+//Components
+import 'package:banana/components/postCard.dart';
 import 'package:banana/components/customDrawer.dart';
 import 'package:banana/components/messagesBody.dart';
+import 'package:banana/components/notificationCard.dart';
+
+//Utils Class
 import 'package:banana/util/Feed.dart';
 import 'package:banana/util/Message.dart';
+import 'package:banana/util/Notifications.dart';
 
 Widget buildBody(int state,String id,dynamic context){
   if(state==0){
@@ -25,6 +32,64 @@ Widget buildBody(int state,String id,dynamic context){
           child: CircularProgressIndicator(
             backgroundColor: AppColors().themeColor,
             valueColor: new AlwaysStoppedAnimation<Color>(AppColors().themeColor),
+          ),
+        );
+      }
+    );
+  }else if (state==2){
+    return FutureBuilder(
+      future:fetchNotifications(state,id),
+      builder:(context,data){
+        if(data.hasData){
+          if(data.data.length==0){
+            //no notifications view
+            return Center(
+                child:ClipRRect(
+                  borderRadius: BorderRadius.circular(50.0),
+                  child: Container(
+                    color: AppColors().themeColor,
+                    width: 350,
+                    height: 650,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children:<Widget>[
+                          Text(
+                              "No notifications available yet.",
+                            style:TextStyle(
+                              fontWeight: FontWeight.bold
+                            )
+                          ),
+                          Text(
+                              "When new notification found, they'll show up here.",
+                              style: TextStyle(
+                                color:AppColors().mostUsedBlack
+                              ),
+                          ),
+                        ]
+                      )
+                    ),
+                  )
+                )
+            );
+                }else{
+            //notifications card
+           return ListView.builder(
+              itemCount: data.data.length,
+              physics: ScrollPhysics(),
+              shrinkWrap: true,
+              itemBuilder: (context, index){
+                return SingleChildScrollView(
+                  child: NotificationsList(id:data.data[index].id.toString(),text:data.data[index].text,)
+                );
+              },
+            );
+          }
+        }return Center(
+          child: CircularProgressIndicator(
+            backgroundColor: AppColors().themeColor,
+            valueColor: new AlwaysStoppedAnimation<Color>(AppColors().themeColor),
+            //refresh after a certain time
           ),
         );
       }
@@ -50,6 +115,29 @@ Widget buildBody(int state,String id,dynamic context){
     );
   }
 }
+Future<List<Notifications>> fetchNotifications(int state,String id) async{
+  List<Notifications> notifications = [];
+  if(state==2){
+    final response = await http.get(Uri.http('localhost:3000', '/notifications',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      for (var item in jsonDecode(response.body)[0]){
+        notifications.add(Notifications(id:item["id"],text:item["text"]));
+      }
+      return notifications;
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load feed information.');
+    }
+  }
+  else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load feed information.');
+  }
+}
 Future<List<Feed>> fetchFeed(int state,String id) async{
   List<Feed> feeds = [];
   if(state==0){
@@ -57,6 +145,7 @@ Future<List<Feed>> fetchFeed(int state,String id) async{
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
+
       feeds = List<Feed>.from(jsonDecode(response.body)[0].map((model)=> Feed.fromJson(model)));
       return feeds;
     } else {
@@ -70,6 +159,7 @@ Future<List<Feed>> fetchFeed(int state,String id) async{
       throw Exception('Failed to load feed information.');
     }
 }
+
 Future<List<ChatUsers>> fetchMessages(int state,String id) async{
   List<ChatUsers> msg = [];
   final response = await http.get(Uri.http('localhost:3000', '/messages',{"_start":id,"_end":(int.parse(id)+1).toString()}));
@@ -117,6 +207,14 @@ class _HomeState extends State<Home>{
       child:Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
+            actions: currentState==2 ? [
+              GestureDetector(
+              onTap: () {  Navigator.pushNamed(context, "/notifications_",arguments: {"id":id});},
+              child: CircleAvatar(
+                backgroundImage: NetworkImage("https://cdn0.iconfinder.com/data/icons/kameleon-free-pack-rounded/110/Settings-2-512.png"),
+                maxRadius: 25,
+              ),
+            ),SizedBox(width:5,height:5)] : [],
             iconTheme: IconThemeData(color: AppColors().themeColor),
             title: Center(
               child: Row(
@@ -163,7 +261,7 @@ class _HomeState extends State<Home>{
                 backgroundColor: AppColors().themeColor,
               )
           ):null,
-          endDrawer: customDrawer(id)
+          endDrawer: (currentState!=2) ? customDrawer(id) : null
       )
     );
   }

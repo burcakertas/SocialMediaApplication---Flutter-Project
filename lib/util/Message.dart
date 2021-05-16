@@ -13,6 +13,6 @@ class ChatUsersDetailed{
   String text;
   String messageText;
   String image;
-  List<dynamic> conversations;
+  List<String> conversations;
   ChatUsersDetailed({@required this.id,@required this.text,@required this.messageText,@required this.image,@required this.conversations});
 }
