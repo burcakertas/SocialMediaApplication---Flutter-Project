@@ -33,6 +33,14 @@ class AppStyles{
           )
       )
   );
+  final createGoogleAccButton = ButtonStyle(
+      backgroundColor: MaterialStateProperty.all<Color>(AppColors().innerButtonWhite),
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40.0),
+          )
+      )
+  );
   final alreadyHaveAccTexts = {
     'grey':GoogleFonts.openSans(
         textStyle:TextStyle(
@@ -72,6 +80,29 @@ class AppStyles{
       )
   );
 
+  final usernameDecoration = InputDecoration(
+    //prefixIcon: Icon(Icons.contact_phone_rounded ),
+      suffixIcon: Icon(Icons.badge),
+      fillColor: AppColors().batmanGrey,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(25.0),
+        borderSide: BorderSide(color:AppColors().batmanGrey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      labelStyle: TextStyle(
+        color: AppColors().mostUsedBlack,
+      ),
+      labelText: 'Username',
+      hintText: 'Enter your username',
+      hintStyle: TextStyle(
+          color:AppColors().authenticationInput
+      )
+  );
+
+
   final emailDecoration = InputDecoration(
       suffixIcon: Icon(Icons.contact_mail_rounded),
       fillColor: AppColors().batmanGrey,
@@ -108,8 +139,8 @@ class AppStyles{
       labelStyle: TextStyle(
         color: AppColors().mostUsedBlack,
       ),
-      labelText: 'Email or username',
-      hintText: 'abc@gmail.com or @funzin',
+      labelText: 'Email',
+      hintText: 'Ex:abc@gmail.com or @funzin',
       hintStyle: TextStyle(
           color:AppColors().authenticationInput
       )
@@ -125,4 +156,46 @@ class AppStyles{
       )
   );
 
+  //Change Profile
+  final birthDate = InputDecoration(
+      suffixIcon: Icon(Icons.date_range),
+      fillColor: AppColors().batmanGrey,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(25.0),
+        borderSide: BorderSide(color:AppColors().batmanGrey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      labelStyle: TextStyle(
+        color: AppColors().mostUsedBlack,
+      ),
+      labelText: 'Birth Date',
+      hintText: 'Ex:01.01.2000',
+      hintStyle: TextStyle(
+          color: AppColors().authenticationInput
+      )
+  );
+
+  final bioDecoration = InputDecoration(
+      suffixIcon: Icon(Icons.info),
+      fillColor: AppColors().batmanGrey,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(25.0),
+        borderSide: BorderSide(color:AppColors().batmanGrey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide:  BorderSide(color: AppColors().themeColor, width: 2.0),
+        borderRadius: BorderRadius.circular(25.0),
+      ),
+      labelStyle: TextStyle(
+        color: AppColors().mostUsedBlack,
+      ),
+      labelText: 'Bio',
+      hintText: 'Ex:I am a techy guy with british accent.',
+      hintStyle: TextStyle(
+          color: AppColors().authenticationInput
+      )
+  );
 }

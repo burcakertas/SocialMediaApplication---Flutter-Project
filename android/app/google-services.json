@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "755451188795",
+    "firebase_url": "https://banana-e15e6-default-rtdb.firebaseio.com",
+    "project_id": "banana-e15e6",
+    "storage_bucket": "banana-e15e6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755451188795:android:9f82f1adf59ce30ee2ee1e",
+        "android_client_info": {
+          "package_name": "com.example.banana"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "755451188795-aka78l684d1lso1b3ucs3qv2trrj6mnc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.banana",
+            "certificate_hash": "09c125bd82229b70e805558d799f47892f9cc427"
+          }
+        },
+        {
+          "client_id": "755451188795-0ps07istmsgaofn2k2ea0j4c77eotgn6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApPU1roKcCt86dR0caaQ2NIXUt8bloqTg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "755451188795-0ps07istmsgaofn2k2ea0j4c77eotgn6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
