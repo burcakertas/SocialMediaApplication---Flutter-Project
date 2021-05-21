@@ -1,64 +1,54 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
 import 'package:banana/util/User.dart';
 import 'package:banana/util/Feed.dart';
 import 'package:banana/components/postCard.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-
-Future<User_> fetchUser() async {
-  var uid = FirebaseAuth.instance.currentUser.uid;
-  var usrInfo = await FirebaseFirestore.instance.collection("users").doc(uid).get();
-  var followers = await FirebaseFirestore.instance.collection("users").doc(uid).collection("followers").get();
-  var followings = await FirebaseFirestore.instance.collection("users").doc(uid).collection("followings").get();
-  User_ current = new User_(
-      name:usrInfo.data()["name"],
-      username:usrInfo.data()["username"],
-      picture:usrInfo.data()["picUrl"],
-      followers: followers.docs.length,
-      followings: followings.docs.length
-      );
-
-  return current;
+Future<User> fetchUser(String id) async {
+  final response = await http.get(Uri.http('localhost:3000', '/users',{"id":id}));
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    return User.fromJson(jsonDecode(response.body)[0]);
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load user information.');
+  }
 }
-Future<List<Feed>> buildContext(int currentState) async {
-  //get user
-  List<Feed> lister = [];
-  var uid = FirebaseAuth.instance.currentUser.uid;
-  var posts = await FirebaseFirestore.instance.collection("users").
-              doc(uid).collection("posts").orderBy("timestamp",descending: true).get();//.orderBy("timestamp")
-  for(var post in posts.docs){
-    //get user info if not self
-    var bananaOwnerInfo;
-    if(post.data()["creator"]!=uid){
-      bananaOwnerInfo = await FirebaseFirestore.instance.collection("users").doc(post.data()["creator"]).get();
-      lister.add(
-          Feed(
-              id: bananaOwnerInfo.id,
-              name:  bananaOwnerInfo.data()["name"],
-              username: bananaOwnerInfo.data()["username"],
-              content: post.data()["text"],
-              picture:bananaOwnerInfo.data()["picUrl"],
-              media: ""
-          )
-      );
+Future<List<Feed>> buildContext(String id,int currentState) async {
+  if(currentState==1){
+    final response = await http.get(Uri.http('localhost:3000', '/user_bananas',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      List<Feed> feeds = [];
+      var decoded = jsonDecode(response.body)[0];
+      for(int i = 0; i < decoded.length;i++){
+        feeds.add(Feed.fromJson(decoded[i]));
+      }
+      return feeds;
     }
-    else{
-      bananaOwnerInfo = await FirebaseFirestore.instance.collection("users").doc(uid).get();
-      lister.add(
-          Feed(
-              id:uid,
-              name: bananaOwnerInfo.data()["name"],
-              username: bananaOwnerInfo.data()["username"],
-              content: post.data()["text"],
-              picture: bananaOwnerInfo.data()["picUrl"],
-              media: ""
-          )
-      );
+  }else if(currentState==2){
+      final response = await http.get(Uri.http('localhost:3000', '/user_bananas',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+      if (response.statusCode == 200) {
+        // If the server did return a 200 OK response,
+        // then parse the JSON.
+        List<Feed> feeds = [];
+        var decoded = jsonDecode(response.body)[0];
+        for(int i = 0; i < decoded.length;i++){
+          if(decoded[i]["media"]!=null){feeds.add(Feed.fromJson(decoded[i]));}
+        }
+
+        return feeds;
+      }else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load user information.');
     }
   }
-  return lister;
 }
 
 class Profile extends StatefulWidget {
@@ -67,28 +57,28 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  String id = null;
   int currentShow;
 @override
   void initState() {
+    // TODO: implement initState
     currentShow=1;
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
+    final  Map<String, Object>rcvdData = ModalRoute.of(context).settings.arguments;
+    setState(() {
+      id=rcvdData["id"].toString();
+    });
     return FutureBuilder(
-      future:fetchUser(),
+      future:fetchUser(id),
       builder:(context,user){
         if(user.hasData){
           return Scaffold(
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(200.0),
               child: AppBar(
-                actions: [
-                  new IconButton(
-                    icon: new Icon(Icons.settings, color: AppColors().mostUsedBlack),
-                    onPressed: () => Navigator.pushNamed(context, "/change_profile")
-            ),
-                ],
                 leading: new IconButton(
                   icon: new Icon(Icons.arrow_back, color: AppColors().mostUsedBlack),
                   onPressed: () => Navigator.of(context).pop(),
@@ -100,55 +90,89 @@ class _ProfileState extends State<Profile> {
                   ),
                 ),
                 flexibleSpace: FlexibleSpaceBar(
-                  titlePadding: EdgeInsets.all(8),
                   title: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      GestureDetector(
-                        child:Image(
-                          image:NetworkImage(
-                            "${user.data.picture}",
-                          ),
-                          height: 80,
+                      Center(
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal:18.0),
+                              child: GestureDetector(
+                                child:Image(
+                                  image:NetworkImage(
+                                    "${user.data.picture}",
+                                  ),
+                                  height: 80,
+                                ),
+                                //onTap: (){
+                                  //Navigator.pushNamed(context, "/profile",arguments:{'id':id});
+                                //},
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(170, 0, 0, 0), // Padding Issue
+                                              child: TextButton(onPressed: (){Navigator.pushNamed(context, "/change_profile",arguments:{'id':id});}, child: Text("Change profile",
+                                                  style:TextStyle(
+                                                      fontSize: 12.0,
+                                                      color:AppColors().batmanGrey
+                                                  )
+                                              ),
+                                                  style: ButtonStyle(
+                                                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                                          RoundedRectangleBorder(
+                                                              borderRadius: BorderRadius.circular(5.0),
+                                                              side: BorderSide(color: AppColors().batmanGrey)
+                                                          )
+                                                      )
+                                                  )
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Text("${user.data.name}",style: TextStyle(fontSize: 16.0,color:AppColors().mostUsedBlack),),
+                                        Text("@${user.data.username}",style: TextStyle(fontSize: 18.0,color: AppColors().mostUsedBlack),),
+                                        SizedBox(height: 10.0,),
+                                        Row(
+                                          children: [
+                                            TextButton(
+                                              onPressed: (){Navigator.pushNamed(context, "/self_followers",arguments: {'id':id});},
+                                              child: Text("Followers ${user.data.followers.length}",
+                                                  style: TextStyle(
+                                                      fontSize: 15.0,
+                                                      color: AppColors().mostUsedBlack
+                                                  )
+                                              ),
+                                            ),
+                                            TextButton(
+                                              onPressed: (){Navigator.pushNamed(context, "/self_following",arguments: {'id':id});},
+                                              child: Text("Following ${user.data.followings.length}",
+                                                  style: TextStyle(
+                                                      fontSize: 15.0,
+                                                      color: AppColors().mostUsedBlack
+                                                  )
+                                              ),
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          ],
                         ),
-                        //onTap: (){
-                        //Navigator.pushNamed(context, "/profile",arguments:{'id':id});
-                        //},
-                      ),
-                      Text(user.data.username,
-                          style: TextStyle(
-                              fontSize: 15.0,
-                              color: AppColors().mostUsedBlack
-                          )
-                      ),
-                      Text(user.data.name,
-                          style: TextStyle(
-                              fontSize: 15.0,
-                              color: AppColors().mostUsedBlack
-                          )
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TextButton(
-                            onPressed: (){Navigator.pushNamed(context, "/self_following");},
-                            child: Text("Following ${user.data.followings}",
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    color: AppColors().mostUsedBlack
-                                )
-                            ),
-                          ),TextButton(
-                            onPressed: (){Navigator.pushNamed(context, "/self_followers");},
-                            child: Text("Followers ${user.data.followers}",
-                                style: TextStyle(
-                                    fontSize: 15.0,
-                                    color: AppColors().mostUsedBlack
-                                )
-                            ),
-                          ),
-
-                        ],
                       ),
                     ],
                   ),
@@ -175,7 +199,7 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                     Divider(color: AppColors().batmanGrey,),
-                    FutureBuilder(future:buildContext(currentShow),builder: (context,data){
+                    FutureBuilder(future:buildContext(id, currentShow),builder: (context,data){
                      if(data.hasData){
                        if(currentShow==1){
                          return Column(
@@ -206,7 +230,7 @@ class _ProfileState extends State<Profile> {
           );
       }
         else{
-          return Scaffold(body:Center(child:CircularProgressIndicator()));
+          return Container(child:Center(child:Text("Problem occured...")));
         }
     }
     );

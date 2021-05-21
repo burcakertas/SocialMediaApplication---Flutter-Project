@@ -33,14 +33,6 @@ class AppStyles{
           )
       )
   );
-  final createGoogleAccButton = ButtonStyle(
-      backgroundColor: MaterialStateProperty.all<Color>(AppColors().innerButtonWhite),
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(40.0),
-          )
-      )
-  );
   final alreadyHaveAccTexts = {
     'grey':GoogleFonts.openSans(
         textStyle:TextStyle(
@@ -139,7 +131,7 @@ class AppStyles{
       labelStyle: TextStyle(
         color: AppColors().mostUsedBlack,
       ),
-      labelText: 'Email',
+      labelText: 'Email or username',
       hintText: 'Ex:abc@gmail.com or @funzin',
       hintStyle: TextStyle(
           color:AppColors().authenticationInput

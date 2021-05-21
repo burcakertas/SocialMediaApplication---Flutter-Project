@@ -95,6 +95,7 @@ class _ConversationListState extends State<ConversationList> {
                 ],
               ),
             ),
+            Text(widget.id,style: TextStyle(fontSize: 12),),
           ],
         ),
       ),

@@ -1,68 +1,23 @@
 import 'package:banana/util/Message.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'dart:io';
 Future<ChatUsersDetailed> fetchMessages(String id) async {
-  //get current user
-  var uid = FirebaseAuth.instance.currentUser.uid;
-  var usrInfo = await FirebaseFirestore.instance.collection("users").doc(id).get();
-  //connect to realtime db
-  DatabaseReference dbRefs = FirebaseDatabase.instance.reference();
-  var tempMsg;
-  List<int>turner = [];
-  if(id.compareTo(uid)==0 || id.compareTo(uid)==1)
-    tempMsg =  dbRefs.child("chtBtwn").child(uid+id).limitToLast(100);
-  else
-    tempMsg =  dbRefs.child("chtBtwn").child(id+uid).limitToLast(100);
-  ChatUsersDetailed currentChat = new ChatUsersDetailed(id: id, chtname: usrInfo.data()["name"],image: usrInfo.data()["picUrl"], conversations: []);
-  //parse conversation
-  List<String> conversations_ = [];
-  await tempMsg.once().then((DataSnapshot snapshot){
-    try{
-      Map<dynamic, dynamic> mapped = snapshot.value;
-      var obj = mapped.values.toList();
-      obj.sort((b,a) => b["timestamp"].compareTo(a["timestamp"]));
-      for(var val in obj){
-        conversations_.add(val["text"]);
-        turner.add(val["sender"]==uid ? 1 : 0);
-      }
-    }catch(e){
-      print("No elements to add");
-    }
+  final response = await http.get(Uri.http('localhost:3000', '/messages_single',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    var decoded = jsonDecode(response.body)[0];
 
-  });
-  currentChat.conversations = List.from(conversations_.reversed);
-  currentChat.turn = List.from(turner.reversed);
-  return currentChat;
-}
-
-Future<void> sendMessage(String id,String text) async{
-  //check for text limit
-  var uid = FirebaseAuth.instance.currentUser.uid;
-  DatabaseReference dbRefs = FirebaseDatabase.instance.reference();
-  var ifUserChats = await FirebaseFirestore.instance.collection("users").doc(uid).collection("chtWith").doc(id).get();
-  if(!ifUserChats.exists){
-    await FirebaseFirestore.instance.collection("users").doc(uid).collection("chtWith").doc(id).set({});
+    var generated =  ChatUsersDetailed(id:decoded["id"].toString(), text:decoded["text"],  messageText:decoded["messageText"], image:decoded["p_pic"],conversations:["amk","amk","amk","amk"]);
+    return generated;
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load user information.');
   }
-  ifUserChats = await FirebaseFirestore.instance.collection("users").doc(id).collection("chtWith").doc(uid).get();
-  if(!ifUserChats.exists){
-    await FirebaseFirestore.instance.collection("users").doc(id).collection("chtWith").doc(uid).set({});
-  }
-  if(id.compareTo(uid)==0 || id.compareTo(uid)==1)
-    dbRefs.child("chtBtwn").child(uid+id).push().set({
-      "sender":uid,
-      "timestamp":ServerValue.timestamp,
-      "text":text
-  });
-  else
-    dbRefs.child("chtBtwn").child(id+uid).push().set({
-      "sender":uid,
-      "timestamp":ServerValue.timestamp,
-      "text":text
-    });
 }
 
 class SingleMessage extends StatefulWidget {
@@ -72,7 +27,6 @@ class SingleMessage extends StatefulWidget {
 
 class _SingleMessageState extends State<SingleMessage> {
   String id = null;
-  final TextEditingController _controller = new TextEditingController();
   @override
   Widget build(BuildContext context) {
     final  Map<String, Object>rcvdData = ModalRoute.of(context).settings.arguments;
@@ -93,7 +47,7 @@ class _SingleMessageState extends State<SingleMessage> {
                     children: <Widget>[
                       IconButton(
                         onPressed: (){
-                            Navigator.pop(context);
+                          Navigator.pop(context);
                         },
                         icon: Icon(Icons.arrow_back,color: Colors.black,),
                       ),
@@ -108,7 +62,7 @@ class _SingleMessageState extends State<SingleMessage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Text(data.data.chtname,style: TextStyle( fontSize: 16 ,fontWeight: FontWeight.w600),),
+                            Text(data.data.text,style: TextStyle( fontSize: 16 ,fontWeight: FontWeight.w600),),
                             SizedBox(height: 6,),
                             Text("Online",style: TextStyle(color: Colors.grey.shade600, fontSize: 13),),
                           ],
@@ -141,11 +95,11 @@ class _SingleMessageState extends State<SingleMessage> {
                       return Container(
                         padding: EdgeInsets.only(left: 14,right: 14,top: 10,bottom: 10),
                         child: Align(
-                          alignment: (data.data.turn[index]==0?Alignment.topLeft:Alignment.topRight),
+                          alignment: (index%2==0?Alignment.topLeft:Alignment.topRight),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
-                              color: (data.data.turn[index]!=0?Colors.grey.shade200:Colors.blue[200]),
+                              color: (index%2!=0?Colors.grey.shade200:Colors.blue[200]),
                             ),
                             padding: EdgeInsets.all(16),
                             child: Text(data.data.conversations[index], style: TextStyle(fontSize: 15),),
@@ -166,7 +120,6 @@ class _SingleMessageState extends State<SingleMessage> {
                           SizedBox(width: 15,),
                           Expanded(
                             child: TextField(
-                              controller: _controller,
                               decoration: InputDecoration(
                                   hintText: "Write message...",
                                   hintStyle: TextStyle(color: Colors.black54),
@@ -176,15 +129,7 @@ class _SingleMessageState extends State<SingleMessage> {
                           ),
                           SizedBox(width: 15,),
                           FloatingActionButton(
-                            onPressed: (){
-                              //validate string
-                              sendMessage(id, _controller.text);
-                              _controller.clear();
-                              setState(() {
-
-                              });
-                              //refresh
-                            },
+                            onPressed: (){},
                             child: Icon(Icons.send,color: Colors.white,size: 18,),
                             backgroundColor: Colors.blue,
                             elevation: 0,

@@ -1,10 +1,28 @@
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
 import 'package:banana/util/Styles.dart';
+import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+Future<bool> login(String user,String password,dynamic context) async{
+  final response= await http.get(
+    Uri.http('localhost:3000', '/users',{
+      'email':user,
+      'password':password
+    }),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+  );
+  print(response.body);
+  if(response.statusCode==200 && response.body.length>3){
+    print(jsonDecode(response.body)[0]["id"]);
+    Navigator.pushNamed(context, "/home",arguments: {"id":jsonDecode(response.body)[0]["id"].toString()});
+  }else{
+    //return false;
+    Navigator.pushNamed(context, "/home",arguments: {"id":"0".toString()});
+  }
+}
 
 class Login extends StatefulWidget {
 
@@ -13,45 +31,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login>{
-  Future<bool> loginUser(String mail,String pass,dynamic context) async {
-    try {
-      UserCredential userCredential = await auth.signInWithEmailAndPassword(
-          email: mail,
-          password: pass
-      );
-      print("Successfull:" + userCredential.toString());
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("uid@banana", userCredential.user.uid);
-      print(prefs.getString("uid@banana"));
-      Navigator.pushNamed(context, "/home",arguments: {"id":"0".toString()});
-
-    } on FirebaseAuthException catch (e) {
-      print(e.toString());
-      if(e.code == 'user-not-found') {
-        //error user not found
-        showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: Text('User not found.'),
-              content: Text('Check your email or password.'),
-            )
-        );
-        return false;
-      }
-      else if (e.code == 'wrong-password') {
-        //wrong-password
-        showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: Text('Wrong password.'),
-              content: Text('Check your email or password.'),
-            )
-        );
-      }
-    }
-  }
-  FirebaseAuth auth = FirebaseAuth.instance;
-
   final _formKey = GlobalKey<FormState>();
 
   final List<String> textFieldsValue = [];
@@ -71,12 +50,7 @@ class _LoginState extends State<Login>{
       }
     });
   }
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    FirebaseAnalytics().logEvent(name: "LoginView");
-  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,7 +105,7 @@ class _LoginState extends State<Login>{
                           child: TextFormField(
                             decoration: AppStyles().loginEmailDecoration,
                             validator: (contact){
-                              if(contact==null || contact.isEmpty){return 'Please enter your email';}
+                              if(contact==null || contact.isEmpty){return 'Please enter your username or email';}
                               //else if(!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]*@[a-zA-Z0-9]+\.*[a-zA-Z]*").hasMatch(contact)){ return 'Please enter a valid username or email';}
                               else{ textFieldsValue.add(contact); return null;}
                             },
@@ -215,8 +189,18 @@ class _LoginState extends State<Login>{
                   ,onPressed: (){
                   if(_formKey.currentState.validate()){
                     print("Form is valid.");
-                    FirebaseAnalytics().logEvent(name: "LoginCalled",parameters: {"username":textFieldsValue});
-                    loginUser(textFieldsValue[0], textFieldsValue[1], context);
+                    var respond = login(textFieldsValue[0], textFieldsValue[1], context);
+                    respond.then((value) => {
+                      if(value==false){
+                        showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: Text('There is a problem.'),
+                          content: Text('Check your username or password.'),
+                        )
+                    )
+                      }
+                    });
 
                       textFieldsValue.removeRange(0,textFieldsValue.length);
                   }else{

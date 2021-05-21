@@ -1,9 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:banana/util/Colors.dart';
@@ -99,7 +96,7 @@ Widget buildBody(int state,String id,dynamic context){
     );
   }else if (state==3){
     return FutureBuilder(
-      future:fetchMessages(),
+      future:fetchMessages(state, id),
       builder:(context,data){
         if(data.hasData){
           return messages(data.data);
@@ -121,7 +118,7 @@ Widget buildBody(int state,String id,dynamic context){
 Future<List<Notifications>> fetchNotifications(int state,String id) async{
   List<Notifications> notifications = [];
   if(state==2){
-    final response = await http.get(Uri.http('10.0.2.2:3000', '/notifications',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+    final response = await http.get(Uri.http('localhost:3000', '/notifications',{"_start":id,"_end":(int.parse(id)+1).toString()}));
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -143,69 +140,42 @@ Future<List<Notifications>> fetchNotifications(int state,String id) async{
 }
 Future<List<Feed>> fetchFeed(int state,String id) async{
   List<Feed> feeds = [];
-  List<DateTime> order = [];
   if(state==0){
-      var uid = FirebaseAuth.instance.currentUser.uid;
-      //get user posts
-      //get followers
-      //get followers posts
-      var userPost = await FirebaseFirestore.instance.collection("users").doc(uid).collection("posts").orderBy("timestamp",descending: true).get();
-      var user = await FirebaseFirestore.instance.collection("users").doc(uid).get();
-      var followings = await FirebaseFirestore.instance.collection("users").doc(uid).collection("followings").get();
-      for(var uposts in userPost.docs){
-        feeds.add(Feed(id: uid,name:user.data()["name"],username:user.data()["username"],picture: user.data()["picUrl"],media: "",content: uposts.data()["text"]));
-        order.add(uposts.data()["timestamp"].toDate());
-      }
-      for(var fuser in followings.docs){
-        var tempPosts = await FirebaseFirestore.instance.collection("users").doc(fuser.id).collection("posts").orderBy("timestamp",descending: true).get();
-        var user = await FirebaseFirestore.instance.collection("users").doc(fuser.id).get();
-        for(var uposts in tempPosts.docs){
-          feeds.add(Feed(id: uid,name:user.data()["name"],username:user.data()["username"],picture: user.data()["picUrl"],media: "",content: uposts.data()["text"]));
-          order.add(uposts.data()["timestamp"].toDate());
-        }
-      }
-      //before returning resort data locally
-      final Map<DateTime, Feed> mappings = {
-        for (int i = 0; i < order.length; i++)
-          order[i]: feeds[i]
-      };
+    final response = await http.get(Uri.http('localhost:3000', '/feeds',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
 
-      order.sort((b, a) => a.compareTo(b));
-
-      feeds = [
-        for (DateTime number in order) mappings[number]
-      ];
-  }
-  print(feeds);
-  return feeds;
+      feeds = List<Feed>.from(jsonDecode(response.body)[0].map((model)=> Feed.fromJson(model)));
+      return feeds;
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load feed information.');
+    }
+  }else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load feed information.');
+    }
 }
 
-Future<List<ChatUsers>> fetchMessages() async{
-  List<ChatUsers> lister = [];
-  //get current user
-  var uid = FirebaseAuth.instance.currentUser.uid;
-  //get whom in chat with
-  var chatWith = await FirebaseFirestore.instance.collection("users").doc(uid).collection("chtWith").get();
-  //connect to realtime db
-  DatabaseReference dbRefs = FirebaseDatabase.instance.reference();
-  for(var usr in chatWith.docs){
-    var tempMsg;
-    if(usr.id.compareTo(uid)==0 || usr.id.compareTo(uid)==1)
-      tempMsg =  dbRefs.child("chtBtwn").child(uid+usr.id).limitToLast(1);
-    else
-      tempMsg =  dbRefs.child("chtBtwn").child(usr.id+uid).limitToLast(1);
-    var usrInfo = await FirebaseFirestore.instance.collection("users").doc(usr.id).get();
-    await tempMsg.once().then((DataSnapshot snapshot){
-      try{
-        Map<dynamic, dynamic> mapped = snapshot.value;
-        var obj = mapped.values.toList()[0];
-        lister.add(new ChatUsers(id: usr.id, text:usrInfo.data()["name"] , messageText: obj["text"], image: usrInfo.data()["picUrl"]));
-      }catch(e){
-        print("No elements to add");
-      }
-    });
+Future<List<ChatUsers>> fetchMessages(int state,String id) async{
+  List<ChatUsers> msg = [];
+  final response = await http.get(Uri.http('localhost:3000', '/messages',{"_start":id,"_end":(int.parse(id)+1).toString()}));
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    var decoded = jsonDecode(response.body)[0];
+    for(var item in decoded){
+      msg.add(ChatUsers(id:item["id"].toString(),text: item["text"], messageText: item["messageText"], image: item["p_pic"]));
+    }
+    return msg;
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load feed information.');
   }
-  return lister;
 }
 
 class Home extends StatefulWidget {
@@ -230,7 +200,7 @@ class _HomeState extends State<Home>{
   Widget build(BuildContext context) {
     final  Map<String, Object>rcvdData = ModalRoute.of(context).settings.arguments;
     setState(() {
-      id="0";//rcvdData["id"].toString();
+      id=rcvdData["id"].toString();
     });
     return WillPopScope(
       onWillPop: () async => false,
@@ -286,17 +256,12 @@ class _HomeState extends State<Home>{
               height: 70.0,
               width: 70.0,
               child: FloatingActionButton(
-                onPressed:(){
-                  if(currentState!=3)
-                    Navigator.pushNamed(context, "/posting");
-                  else
-                    Navigator.pushNamed(context, "/select_msg");
-                },
+                onPressed:(){},
                 child: Icon(FABIcons[currentState],color: AppColors().mostUsedBlack,size: 55.0,),
                 backgroundColor: AppColors().themeColor,
               )
           ):null,
-          endDrawer: (currentState!=2) ? customDrawer() : null
+          endDrawer: (currentState!=2) ? customDrawer(id) : null
       )
     );
   }

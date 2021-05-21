@@ -5,12 +5,12 @@ import 'package:custom_switch/custom_switch.dart';
 import'package:http/http.dart' as http;
 import 'dart:convert';
 
-Future<User_> fetchUser(String id) async {
-  final response = await http.get(Uri.http('10.0.2.2:3000', '/users',{"id":id}));
+Future<User> fetchUser(String id) async {
+  final response = await http.get(Uri.http('localhost:3000', '/users',{"id":id}));
   if (response.statusCode == 200) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
-    return User_.fromJson(jsonDecode(response.body)[0]);
+    return User.fromJson(jsonDecode(response.body)[0]);
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.

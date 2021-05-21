@@ -1,9 +1,8 @@
 import 'package:banana/util/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
-import 'package:firebase_auth/firebase_auth.dart' ;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Register extends StatefulWidget {
 
@@ -15,12 +14,8 @@ class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
 
   final List<String> textFieldsValue = [];
-
   bool _isToggled = true;
   var _toggleIcon = Icon(Icons.remove_red_eye, color: Colors.grey);
-
-  FirebaseAuth auth = FirebaseAuth.instance;
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   _togglePassword() {
     setState(() {
@@ -32,47 +27,6 @@ class _RegisterState extends State<Register> {
         _isToggled = false;
       }
     });
-  }
-
-  Future<void> signupUser(String mail,String pass,String name,String username) async {
-    try {
-      UserCredential userCredential = await auth.createUserWithEmailAndPassword(email: mail, password: pass);
-      print("User credentials");
-      print(userCredential.toString());
-      CollectionReference users = FirebaseFirestore.instance.collection('users');
-      User user = await FirebaseAuth.instance.currentUser;
-
-      users.doc(userCredential.user.uid).set({
-        'username': username, // John Doe
-        'name': name, // Stokes and Sons
-        'picUrl':"https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/avocado_scream_avatar_food-512.png",
-        'settings': {} // 42
-      })
-          .then((value) => print("User Added")).catchError((error) => user.delete());
-      Navigator.pushNamed(context,"/home");
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("uid@banana", userCredential.user.uid);
-    } on FirebaseAuthException catch (e) {
-      print(e.toString());
-      if(e.code == 'email-already-in-use') {
-        showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: Text('Email already exists.'),
-              content: Text('An user with the given email already exists.'),
-            )
-        );
-      }
-      else if(e.code == 'weak-password') {
-        showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: Text('Weak password.'),
-              content: Text('Please choose a strong password in order to proceed.'),
-            )
-        );
-      }
-    }
   }
 
   @override
@@ -245,9 +199,28 @@ class _RegisterState extends State<Register> {
                   )
                   ,onPressed: (){
                     if(_formKey.currentState.validate()){
+                      print("Form is valid.");
                       print(textFieldsValue);
-                      signupUser(textFieldsValue[2], textFieldsValue[3],textFieldsValue[0],textFieldsValue[1]);
-                      textFieldsValue.clear();
+                      final response=http.post(
+                        Uri.http('localhost:3000', '/users'),
+                        headers: <String, String>{
+                          'Content-Type': 'application/json; charset=UTF-8',
+                        },
+                        body: jsonEncode(<String, String>{
+                          'name': textFieldsValue[0],
+                          'email':textFieldsValue[2],
+                          'username':textFieldsValue[1],
+                          'password':textFieldsValue[3]
+                        }),
+                      );
+                      response.then((value) => (){
+                        if(value.statusCode!=200){
+                          print("Error");
+                          textFieldsValue.removeRange(0, textFieldsValue.length);
+                        }
+                      });
+                    }else{
+                      print(_formKey.currentState.validate());
                     }
                 },
                   style: AppStyles().submitButton

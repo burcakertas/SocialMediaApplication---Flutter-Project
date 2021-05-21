@@ -18,7 +18,7 @@ This is a social media prototype designed and developed for CS-310 course.
     - [x] Comment, re-tweet, like dislike
     - [x] Messages
     - [x] Join in discover many more features
-- [x] Show only a single time (At the beginning) needs saving locally
+- [ ] Show only a single time (At the beginning) needs saving locally
 - [x] SVG and PNGS
 
 ### Import Styles and Colors ✔
@@ -30,14 +30,3 @@ This is a social media prototype designed and developed for CS-310 course.
 ### Custom Drawer Text Should Shrink to Fit
 - [ ] Text Should Shrink
 - [ ] There should be an upper limit for letters
-
-### Firebase 
-- [x] Authentication
-    - [x] Login / Register
-    - [x] Google Social Auth
-    - [x] Remember uid
-        - [x] After register locally store uid
-            NOTE:DO NOT DEPEND ON LOCAL STORAGE USER ID
-        - [X] If uid exists directly send to logged in view stack
-- [] Analytics
-- [] Crashlytics

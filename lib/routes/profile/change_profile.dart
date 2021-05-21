@@ -1,16 +1,22 @@
 import 'package:banana/util/Styles.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
 import 'package:custom_switch/custom_switch.dart';
 import 'package:banana/util/User.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-
-Future<User_> fetchUser() async {
-  var uid = await FirebaseAuth.instance.currentUser.uid;
-  var usrInfo = await FirebaseFirestore.instance.collection("users").doc(uid).get();
-  return User_(id:uid,username:usrInfo.data()["username"],name:usrInfo.data()["name"],picture:usrInfo.data()["picUrl"]);
+Future<User> fetchUser(String id) async {
+  final response = await http.get(Uri.http('localhost:3000', '/users',{"id":id}));
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    return User.fromJson(jsonDecode(response.body)[0]);
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load user information.');
+  }
 }
 
 class ChangeProfile extends StatefulWidget {
@@ -50,10 +56,15 @@ class _ChangeProfileState extends State<ChangeProfile> {
       },
     );
   }
+  String id = null;
   @override
   Widget build(BuildContext context) {
+    final  Map<String, Object>rcvdData = ModalRoute.of(context).settings.arguments;
+    setState(() {
+      id=rcvdData["id"].toString();
 
-    return FutureBuilder(future:fetchUser(),builder: (context,user){
+    });
+    return FutureBuilder(future:fetchUser(id),builder: (context,user){
       if(user.hasData){
         return Scaffold(
           appBar: PreferredSize(
@@ -197,11 +208,7 @@ class _ChangeProfileState extends State<ChangeProfile> {
             ],
           ),
         );
-      }return Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      }return Container();
     });
   }
 }

@@ -1,32 +1,28 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:banana/util/Colors.dart';
+import 'package:http/http.dart' as http;
 import 'package:banana/util/User.dart';
-import 'package:firebase_auth/firebase_auth.dart' as authenticator;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
-Future<User_> fetchDrawer(var context) async {
-  //first fetch id
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  if(prefs.containsKey("uid@banana")){
-    final String  id = prefs.getString("uid@banana").toString();
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-    DocumentSnapshot snapshot = await users.doc(id).get();
-    if(snapshot.exists){
-      var returner = User_.fromJson(snapshot.data());
-      return returner;
-    }
-    else{
-      //should log out;
-    }
 
+Future<User> fetchDrawer(String id) async {
+  final response = await http.get(Uri.http('localhost:3000', '/users',{"id":id}));
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    print(User.fromJson(jsonDecode(response.body)[0]));
+    return User.fromJson(jsonDecode(response.body)[0]);
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load user information.');
   }
-  else
-    Navigator.popAndPushNamed(context, "/welcome");
 }
 
 class customDrawer extends StatefulWidget {
+  customDrawer(this.id);
+  final String id;
   @override
   _customDrawerState createState() => _customDrawerState();
 }
@@ -35,22 +31,16 @@ class _customDrawerState extends State<customDrawer> {
   void initState() {
     super.initState();
   }
-  authenticator.FirebaseAuth auth = authenticator.FirebaseAuth.instance;
-  signOut() async {
-    await auth.signOut().catchError((error){
-      print(error.toString());
-    });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if(prefs.containsKey("uid@banana")){
-      await prefs.remove("uid@banana");
-    }
-    Navigator.popAndPushNamed(context, "/welcome");
-  }
   @override
   Widget build(BuildContext context) {
+    String id;
+    final  Map<String, Object>rcvdData = ModalRoute.of(context).settings.arguments;
+    setState(() {
+      id=rcvdData["id"].toString();
+    });
     return Drawer(
-        child:FutureBuilder<User_>(
-          future: fetchDrawer(context),
+        child:FutureBuilder<User>(
+          future: fetchDrawer(widget.id),
           builder: (context, user) {
             if (user.hasData) {
               return Scaffold(
@@ -68,39 +58,86 @@ class _customDrawerState extends State<customDrawer> {
                       ),
                     ),
                     flexibleSpace: FlexibleSpaceBar(
-                      centerTitle: false,
-                      title: Row(
+                      title: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          GestureDetector(
-                            child:Image(
-                              image:NetworkImage(
-                                  "${user.data.picture}"
-                              ),
-                              height: 80,
-                            ),
-                            onTap: (){
-                              Navigator.pushNamed(context, "/profile");
-                            },
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(onPressed: (){},
-                                  child: Text(user.data.username.length<20 ? user.data.username : user.data.username.substring(0,20)+'...',
-                                  style:TextStyle(
-                                    color:AppColors().mostUsedBlack
-                                    )
-                                  )
-                              ),
-                              TextButton(onPressed: (){},
-                                  child: Text(user.data.name.length<40 ? user.data.name : user.data.name.substring(0,40)+'...',
-                                      style:TextStyle(
-                                      color:AppColors().mostUsedBlack
+                          Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            GestureDetector(
+                                              child:Image(
+                                                image:NetworkImage(
+                                                  "${user.data.picture}",
+                                                ),
+                                                height: 80,
+                                              ),
+                                              onTap: (){
+                                                Navigator.pushNamed(context, "/profile",arguments:{'id':id});
+                                              },
+                                            ),
+                                            SizedBox(
+                                              child: Row(children: [
+                                                TextButton(
+                                                  child:AutoSizeText("${user.data.name}",
+                                                      style:TextStyle(
+                                                          color:AppColors().mostUsedBlack,
+                                                      ),
+                                                    maxFontSize: 20.0,
+                                                    maxLines: 1,
+                                                  ),
+                                                  onPressed: (){Navigator.pushNamed(context, "/profile",arguments: {'id':id});},
+                                                ),
+                                                TextButton(
+                                                  child:AutoSizeText("${user.data.username}",
+                                                      style:TextStyle(
+                                                          color:AppColors().mostUsedBlack,
+                                                      ),
+                                                      maxFontSize: 15.0,
+                                                      maxLines: 1
+                                                  ),
+                                                  onPressed: (){Navigator.pushNamed(context, "/profile",arguments:{'id':id});},
+                                                ),
+                                              ],),
+                                            ),
+                                            Row(
+                                              children: [
+                                                TextButton(
+                                                  onPressed: (){Navigator.pushNamed(context, "/self_followers",arguments:{'id':id});},
+                                                  child: Text("Followers",
+                                                      style: TextStyle(
+                                                          fontSize: 15.0,
+                                                          color: AppColors().mostUsedBlack
+                                                      )
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: (){Navigator.pushNamed(context, "/self_following",arguments:{'id':id});},
+                                                  child: Text("Following",
+                                                      style: TextStyle(
+                                                          fontSize: 15.0,
+                                                          color: AppColors().mostUsedBlack
+                                                      )
+                                                  ),
+                                                )
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 )
-                                  )
-                              ),
-
-                            ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -111,27 +148,11 @@ class _customDrawerState extends State<customDrawer> {
 // Important: Remove any padding from the ListView.
                   padding: EdgeInsets.zero,
                   children: <Widget>[
-                    ExpansionTile(
+                    ListTile(
                       title: Text('Profile'),
-                      children: [
-                        ListTile(
-                          title:Text("Profile"),
-                          onTap: () {
-                            Navigator.pushNamed(context, "/profile");
-                          },
-                        ),
-                        ListTile(
-                          title:Text("Following"),
-                          onTap: () {
-                            Navigator.pushNamed(context, "/self_following");
-                          },
-                        ),ListTile(
-                          title:Text("Followers"),
-                          onTap: () {
-                            Navigator.pushNamed(context, "/self_followers");
-                          },
-                        )
-                      ],
+                      onTap: () {
+                        Navigator.pushNamed(context, "/profile",arguments:{'id':id});
+                      },
                     ),
                     ListTile(
                       title: Text('Lists'),
@@ -184,28 +205,18 @@ class _customDrawerState extends State<customDrawer> {
                     ListTile(
                       title: Text('Logout'),
                       onTap: () {
-                        signOut();
-
-                        //remove from shared preferences
-                        //signout
-
+                        Navigator.popUntil(context,ModalRoute.withName('/login'));
                       },
                     ),
                   ],
                 ),
               );
             } else if (user.hasError) {
-              return ListTile(
-                title: Text('Logout'),
-                onTap: () {
-                  signOut();
-
-                },
-              );
+              return Text("${user.error}");
             }
 
             // By default, show a loading spinner.
-            return Center(child: CircularProgressIndicator());
+            return CircularProgressIndicator();
           },
         ),
     );

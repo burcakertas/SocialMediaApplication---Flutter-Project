@@ -17,9 +17,7 @@ List<String> splitter(String content){
 }
 
 class UserCards{
-
   Widget postCard(feed) {
-    print(feed.content);
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Card(
@@ -67,7 +65,7 @@ class UserCards{
                         fontSize: 12
                     ),
                   ),
-                  feed.media!=""?Image.network("https://picsum.photos/250?image=9"):SizedBox(),
+                  feed.media!=null?Image.network("https://picsum.photos/250?image=9"):SizedBox(),
                   SizedBox(height:5,),
                   Row(
                     children: [
@@ -76,6 +74,14 @@ class UserCards{
                           return Icon(
                             FontAwesomeIcons.solidHeart,
                             color: isLiked ? Colors.redAccent : Colors.grey,
+                          );
+                        },
+                      ),
+                      LikeButton(
+                        likeBuilder: (bool isUnLiked) {
+                          return Icon(
+                            FontAwesomeIcons.heartBroken,
+                            color: isUnLiked ? Colors.redAccent : Colors.grey,
                           );
                         },
                       ),
@@ -142,7 +148,7 @@ class UserCards{
 
   }
 
-  Widget Followers(context,user) {
+  Widget Followers(user) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Card(
@@ -183,7 +189,13 @@ class UserCards{
                         fontSize: 12
                     ),
                   ),
-
+                  Text(
+                    user.email,
+                    style: TextStyle (
+                        color: Color.fromRGBO(78, 78, 78, 1),
+                        fontSize: 12
+                    ),
+                  )
                 ],
               )
             ],
@@ -192,61 +204,7 @@ class UserCards{
       ),
     );
   }
-  Widget MsgCan(context,user) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: GestureDetector(
-        onTap: (){
-          Navigator.popAndPushNamed(context, "/single_message",arguments: {"id":user.id});
-        },
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          color: Color.fromRGBO(230, 230, 230, 1),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      width: 50.0,
-                      height: 50.0,
-                      decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: new DecorationImage(
-                              fit: BoxFit.cover,
-                              image: NetworkImage(user.picture)
-                          )
-                      )),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(user.name,
-                      style: TextStyle (
-                          color: Color.fromRGBO(27, 27, 27, 1),
-                          fontSize: 18
-                      ),
-                    ),
 
-                    Text(user.username,
-                      style: TextStyle (
-                          color: Color.fromRGBO(78, 78, 78, 1),
-                          fontSize: 12
-                      ),
-                    ),
-
-                  ],
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
   Widget Followings(user) {
     return Padding(
       padding: const EdgeInsets.all(10.0),
@@ -302,7 +260,13 @@ class UserCards{
                         fontSize: 12
                     ),
                   ),
-
+                  Text(
+                    user.email,
+                    style: TextStyle (
+                        color: Color.fromRGBO(78, 78, 78, 1),
+                        fontSize: 12
+                    ),
+                  )
                 ],
               )
             ],

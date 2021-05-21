@@ -1,18 +1,26 @@
-class User_ {
-  final String id;
+class User {
+  final int id;
   final String name;
   final String username;
+  final String email;
   final String picture;
-  final int followings;
-  final int followers;
-  User_({this.id,this.name,  this.username,  this.followings,  this.followers, this.picture});
+  final List<String> followers;
+  final List<String> followings;
+  final bool accPrivate;
+  final bool accDeactive;
+  User({this.id,  this.name,  this.username, this.email, this.picture, this.followers, this.followings, this.accPrivate, this.accDeactive});
 
-  factory User_.fromJson(Map<String, dynamic> json) {
-    return User_(
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: int.parse(json['id']),
       name: json['name'],
       username: json['username'],
-      picture: json['picUrl'],
-
+      email: json['email'],
+      picture: json['p_pic'],
+      followings: List.from(json['followings']),
+      followers: List.from(json['followers']),
+      accPrivate: json['accPrivate']!=null ? json['accPrivate'] : false,
+      accDeactive: json['accDeactive']!=null ? json['accDeactive']:false,
     );
   }
 }
